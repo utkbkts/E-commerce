@@ -1,6 +1,6 @@
 import { Minus, Plus, Trash } from "lucide-react";
 import { useCartStore } from "../../stores/useCartStore";
-
+import PropTypes from "prop-types";
 const CartItem = ({ item }) => {
   const { removeFromCart, updateQuantity } = useCartStore();
 
@@ -63,5 +63,14 @@ const CartItem = ({ item }) => {
     </div>
   );
 };
-
+CartItem.propTypes = {
+  item: PropTypes.shape({
+    image: PropTypes.string,
+    _id: PropTypes.string,
+    name: PropTypes.string,
+    description: PropTypes.string,
+    price: PropTypes.number,
+    quantity: PropTypes.number,
+  }),
+};
 export default CartItem;

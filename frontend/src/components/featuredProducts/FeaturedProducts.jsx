@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCartStore } from "../../stores/useCartStore";
@@ -110,4 +111,16 @@ const FeaturedProducts = ({ featuredProducts }) => {
     </div>
   );
 };
+
+FeaturedProducts.propTypes = {
+  featuredProducts: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      image: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      price: PropTypes.number.isRequired,
+    })
+  ).isRequired,
+};
+
 export default FeaturedProducts;

@@ -77,3 +77,33 @@ export const useUserStore = create((set, get) => ({
     }
   },
 }));
+
+// let refreshPromise = null;
+
+// axios.interceptors.response.use(
+//   (response) => response, // Yanıt başarılıysa direkt dön
+//   async (error) => {
+//     const originalRequest = error.config;
+
+//     /401 hatası ve token yenileme daha önce denenmediyse
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true; // Aynı isteğin tekrar yenilenmesini engellemek için
+
+//        Eğer bir token yenileme işlemi devam ediyorsa, bekle
+//       if (!refreshPromise) {
+//         refreshPromise = useUserStore.getState().refreshToken();
+//       }
+
+//       try {
+//         await refreshPromise;
+//         refreshPromise = null; // Yenileme işlemi bittiğinde sıfırla
+//         return axios(originalRequest); // İstek başarısız olduğu yerden yeniden gönderilir
+//       } catch (refreshError) {
+//         useUserStore.getState().logout(); // Yenileme başarısız olursa çıkış yap
+//         return Promise.reject(refreshError); // Hatayı döndür
+//       }
+//     }
+
+//     return Promise.reject(error); // Diğer hataları döndür
+//   }
+// );

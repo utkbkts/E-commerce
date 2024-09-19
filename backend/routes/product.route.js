@@ -29,6 +29,7 @@ router.put(
 router.post(
   "/admin/create",
   isAuthenticatedUser,
+  authhorizeRoles("admin"),
   productController.createProduct
 );
 router.delete("/:id", isAuthenticatedUser, productController.deleteProduct);

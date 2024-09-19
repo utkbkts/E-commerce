@@ -6,6 +6,7 @@ import ErrorHandler from "../utils/errorHandler.js";
 
 const createProduct = catchAsyncError(async (req, res, next) => {
   let cloudinaryResponse = null;
+
   if (req.body.image) {
     cloudinaryResponse = await upload_file(req.body.image, "commerce");
   }
@@ -18,21 +19,6 @@ const createProduct = catchAsyncError(async (req, res, next) => {
   res.status(200).json({ product });
 });
 
-const deleteProduct = catchAsyncError(async (req, res, next) => {
-  const product = await Product.findById(req.params.id);
-
-  if (!product) {
-    return next(new ErrorHandler("product is not found", 401));
-  }
-  if (product.image) {
-    const publicId = product.image.split("/").pop().split(".")[0];
-    await delete_file(`commerce/${publicId}`);
-  }
-  await product.deleteOne();
-  return res.status(200).json({
-    message: "delete success",
-  });
-});
 const getFeaturedProducts = catchAsyncError(async (req, res, next) => {
   let featuredProducts = await redis.get("featured_products");
   if (featuredProducts) {
@@ -79,7 +65,7 @@ const getProductsByCategory = catchAsyncError(async (req, res) => {
   const { category } = req.params;
 
   const products = await Product.find({ category });
-  res.json(products);
+  res.json({ products });
 });
 
 const toggleFeaturedProducts = catchAsyncError(async (req, res) => {
@@ -98,6 +84,22 @@ const updateFeaturedProductsCache = catchAsyncError(async (req, res) => {
   await redis.set("featured_products", JSON.stringify(featuredProducts));
 });
 
+const deleteProduct = catchAsyncError(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return next(new ErrorHandler("product is not found", 401));
+  }
+  if (product.image) {
+    const publicId = product.image.split("/").pop().split(".")[0];
+    await delete_file(`commerce/${publicId}`);
+  }
+  await redis.del("featured_products");
+  await product.deleteOne();
+  return res.status(200).json({
+    message: "delete success",
+  });
+});
 export default {
   getAdminProducts,
   getFeaturedProducts,

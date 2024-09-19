@@ -3,19 +3,19 @@ import ErrorHandler from "../utils/errorHandler.js";
 import catchAsyncError from "./catchAsyncError.js";
 import jwt from "jsonwebtoken";
 export const isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
-  const { accessToken } = req.cookies;
+  const { jwtToken } = req.cookies;
 
-  if (!accessToken) {
+  if (!jwtToken) {
     return next(new ErrorHandler("Login first to access this resource", 401));
   }
-  const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+  const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET);
   req.user = await User.findById(decoded.id);
   next();
 });
 
 export const authhorizeRoles = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.roles)) {
+    if (!roles.includes(req.user.role)) {
       return next(
         new ErrorHandler(`Role (${req.user.role}) access this resource`, 403)
       );

@@ -8,7 +8,7 @@ const getCoupon = catchAsyncError(async (req, res) => {
   res.json(coupon || null);
 });
 
-const validateCoupon = catchAsyncError(async (req, res) => {
+const validateCoupon = catchAsyncError(async (req, res, next) => {
   const { code } = req.body;
   const coupon = await Coupon.findOne({
     code: code,

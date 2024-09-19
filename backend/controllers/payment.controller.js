@@ -37,7 +37,7 @@ const createCheckoutSession = catchAsyncError(async (req, res, next) => {
     // Kupon kodunu veritabanında ara
     coupon = await Coupon.findOne({
       code: couponCode, // Kupon kodu
-      userId: req.user._id, // Kullanıcı ID'si
+      user: req.user._id, // Kullanıcı ID'si
       isActive: true, // Kupon aktif mi?
     });
 
@@ -60,7 +60,7 @@ const createCheckoutSession = catchAsyncError(async (req, res, next) => {
       ? [{ coupon: await createStripeCoupon(coupon.discountPercentage) }] // Eğer kupon varsa, indirim uygula
       : [],
     metadata: {
-      userId: req.user._id.toString(), // Kullanıcı ID'si (metadatalarda saklanır)
+      user: req.user._id.toString(), // Kullanıcı ID'si (metadatalarda saklanır)
       couponCode: couponCode || "", // Kupon kodu (eğer varsa)
     },
   });
@@ -83,16 +83,16 @@ async function createStripeCoupon(discountPercentage) {
 }
 
 // Kullanıcıya özel yeni bir kupon oluşturma fonksiyonu
-async function createNewCoupon(userId) {
+async function createNewCoupon(user) {
   // Eğer kullanıcıya ait eski bir kupon varsa, onu sil
-  await Coupon.findOneAndDelete({ userId });
+  await Coupon.findOneAndDelete({ user });
 
   // Yeni bir kupon oluştur
   const newCoupon = new Coupon({
     code: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(), // Rastgele kupon kodu
     discountPercentage: 10, // %10 indirim
     expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 gün geçerlilik süresi
-    userId: userId, // Kullanıcı ID'si
+    user: user, // Kullanıcı ID'si
   });
 
   await newCoupon.save(); // Yeni kuponu veritabanına kaydet
@@ -114,7 +114,7 @@ const checkoutSuccess = catchAsyncError(async (req, res) => {
       await Coupon.findOneAndUpdate(
         {
           code: session.metadata.couponCode, // Kullanılan kupon kodu
-          userId: session.metadata.userId, // Kuponu kullanan kullanıcı ID'si
+          user: session.metadata.user, // Kuponu kullanan kullanıcı ID'si
         },
         {
           isActive: false, // Kuponu devre dışı bırak
@@ -125,7 +125,7 @@ const checkoutSuccess = catchAsyncError(async (req, res) => {
     // Yeni bir sipariş oluştur
     const products = JSON.parse(session.metadata.products); // Oturumdan gelen ürünleri JSON formatına çevir
     const newOrder = new Order({
-      user: session.metadata.userId, // Kullanıcı ID'si
+      user: session.metadata.user, // Kullanıcı ID'si
       products: products.map((product) => ({
         product: product.id, // Ürün ID'si
         quantity: product.quantity, // Ürün miktarı

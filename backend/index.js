@@ -8,13 +8,15 @@ import paymentRoutes from "./routes/payment.route.js";
 import analyticRoutes from "./routes/analytic.route.js";
 import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
+import bodyParser from "body-parser";
 import errorMiddleware from "./middleware/errors.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
-
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);

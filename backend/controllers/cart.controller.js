@@ -3,28 +3,27 @@ import ErrorHandler from "../utils/errorHandler.js";
 import Product from "../models/product.model.js";
 
 const AddToCart = catchAsyncError(async (req, res) => {
-  const { productId } = req.body;
+  const { product } = req.body;
   const user = req.user;
 
-  const existingItem = user.cartItems.find((item) => item.id === productId);
+  const existingItem = user.cartItems.find((item) => item.id === product._id);
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
-    user.cartItems.push(productId);
+    user.cartItems.push(product._id);
   }
   await user.save();
   res.json(user.cartItems);
 });
 
 const getCartProducts = catchAsyncError(async (req, res) => {
-  const cartItemIds = req.user.cartItems.map((item) => item.id);
-  const products = await Product.find({ _id: { $in: cartItemIds } });
+  const products = await Product.find({ _id: { $in: req.user.cartItems } });
 
   const cartItems = products.map((product) => {
-    const quantity =
-      req.user.cartItems.find((item) => item.id === product._id.toString())
-        ?.quantity || 0;
-    return { ...product.toJSON(), quantity };
+    const item = req.user.cartItems.find(
+      (cartItem) => cartItem.id === product.id
+    );
+    return { ...product.toJSON(), quantity: item.quantity };
   });
 
   res.json(cartItems);
@@ -32,6 +31,7 @@ const getCartProducts = catchAsyncError(async (req, res) => {
 
 const removeFromAllCart = catchAsyncError(async (req, res) => {
   const { productId } = req.body;
+  console.log("🚀 ~ removeFromAllCart ~ productId:", productId);
   const user = req.user;
 
   if (!productId) {

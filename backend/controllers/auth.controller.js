@@ -40,21 +40,28 @@ const Login = catchAsyncError(async (req, res, next) => {
 });
 
 const Logout = catchAsyncError(async (req, res, next) => {
-  const refreshToken = req.cookies.refreshToken;
+  const { jwtToken } = req.cookies;
 
-  if (!refreshToken) {
-    return next(new ErrorHandler("Refresh token not provided", 401));
+  if (!jwtToken) {
+    return next(new ErrorHandler("JWT token not provided", 401));
   }
 
-  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET);
 
-  await redis.del(`refresh_token${decoded.id}`);
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
+  await redis.del(`jwtToken${decoded.id}`);
+  res.clearCookie("jwtToken");
 
   res.status(200).json({
     success: true,
     message: "Logged Out",
   });
 });
-export default { SignUp, Login, Logout };
+const getProfile = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req?.user?._id);
+
+  res.status(200).json({
+    user,
+  });
+});
+
+export default { SignUp, Login, Logout, getProfile };

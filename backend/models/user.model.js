@@ -57,16 +57,12 @@ userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.AccessToken = function () {
-  return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: process.env.ACCESS_EXPIRES_TIME,
+userSchema.methods.getJwtToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_TIME,
   });
 };
-userSchema.methods.RefreshToken = function () {
-  return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: process.env.REFRESH_EXPIRES_TIME,
-  });
-};
+
 const User = mongoose.model("User", userSchema);
 
 export default User;

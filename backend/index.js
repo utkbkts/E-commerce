@@ -10,9 +10,13 @@ import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import errorMiddleware from "./middleware/errors.js";
+import path from "path";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const __dirname = path.resolve();
+
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: "10mb" }));
@@ -25,6 +29,13 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/analytic", analyticRoutes);
 
 app.use(errorMiddleware);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "/frontend/dist")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+  });
+}
 
 app.listen(5000, () => {
   console.log(`server is runnig on http://localhost:` + PORT);
